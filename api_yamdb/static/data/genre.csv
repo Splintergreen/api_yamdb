@@ -1,16 +1,16 @@
 id,name,slug
-1,Р”СЂР°РјР°,drama
-2,РљРѕРјРµРґРёСЏ,comedy
-3,Р’РµСЃС‚РµСЂРЅ,western
-4,Р¤СЌРЅС‚РµР·Рё,fantasy
-5,Р¤Р°РЅС‚Р°СЃС‚РёРєР°,sci-fi
-6,Р”РµС‚РµРєС‚РёРІ,detective
-7,РўСЂРёР»Р»РµСЂ,thriller
-8,РЎРєР°Р·РєР°,tale
-9,Р“РѕРЅР·Рѕ,gonzo
-10,Р РѕРјР°РЅ,roman
-11,Р‘Р°Р»Р»Р°РґР°,ballad
+1,Драма,drama
+2,Комедия,comedy
+3,Вестерн,western
+4,Фэнтези,fantasy
+5,Фантастика,sci-fi
+6,Детектив,detective
+7,Триллер,thriller
+8,Сказка,tale
+9,Гонзо,gonzo
+10,Роман,roman
+11,Баллада,ballad
 12,Rock-n-roll,rock-n-roll
-13,РљР»Р°СЃСЃРёРєР°,classical
-14,Р РѕРє,rock
-15,РЁР°РЅСЃРѕРЅ,chanson
+13,Классика,classical
+14,Рок,rock
+15,Шансон,chanson
