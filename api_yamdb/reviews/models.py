@@ -1,11 +1,13 @@
-from django.db import models
-from django.core.validators import MinValueValidator, MaxValueValidator
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import models
 
 from reviews.constants import ROLES
 
 
 class User(AbstractUser):
+
+    email = models.EmailField(unique=True)
     role = models.CharField(max_length=15, choices=ROLES, null=True)
     bio = models.TextField(max_length=200, blank=True, null=True)
     confirmation_code = models.CharField(max_length=200, blank=True, null=True)
