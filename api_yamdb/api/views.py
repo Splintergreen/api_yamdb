@@ -2,12 +2,13 @@ from django.core.mail import send_mail
 from django.utils.crypto import get_random_string
 from django_filters import CharFilter, FilterSet, NumberFilter
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, mixins, status, viewsets
+from rest_framework import filters, mixins, permissions, status, viewsets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from reviews.models import Category, Genre, Title, User
 
+from .permissions import IsAuthorOrAdminOrReadOnly, IsAdminOrReadOnly
 from .serializers import (CategorySerializer, TitlAddDataSerializer,
                           TitleGetDataSerializer, TokenSerializer,
                           UserSerializer)
@@ -45,7 +46,7 @@ def token(request):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    # permission_classes = ()
+    permission_classes = (permissions.IsAdminUser,)
 
     def perform_create(self, serializer):
         serializer.save()
@@ -57,7 +58,7 @@ class CategoryViewSet(mixins.ListModelMixin,
                       viewsets.GenericViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    # permission_classes = ()
+    permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (filters.SearchFilter, )
     search_fields = ('name', )
     lookup_field = 'slug'
@@ -69,10 +70,11 @@ class GenreViewSet(mixins.ListModelMixin,
                    viewsets.GenericViewSet):
     queryset = Genre.objects.all()
     serializer_class = CategorySerializer
-    # permission_classes = ()
+    permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (filters.SearchFilter, )
     search_fields = ('name', )
     lookup_field = 'slug'
+
 
 # lookup_expr??
 class TitleFilterSet(FilterSet):
@@ -85,10 +87,11 @@ class TitleFilterSet(FilterSet):
         model = Title
         fields = ('category', 'genre', 'name', 'year')
 
+
 # rating??
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
-    # permission_classes = ()
+    permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend, )
     filterset_class = TitleFilterSet
 
