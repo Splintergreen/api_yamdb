@@ -1,11 +1,45 @@
+from django.core.mail import send_mail
+from django.utils.crypto import get_random_string
 from reviews.models import User, Category, Genre, Title
 from .serializers import (CategorySerializer,
                           TitlAddDataSerializer,
                           TitleGetDataSerializer,
-                          UserSerializer)
-from rest_framework import viewsets, filters, mixins
+                          UserSerializer, TokenSerializer, UserSerializer)
+from rest_framework import viewsets, filters, mixins, status
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
 from django_filters.rest_framework import DjangoFilterBackend
 from django_filters import FilterSet, CharFilter, NumberFilter
+
+
+@api_view(['POST'])
+def signup(request):
+    user = request.data
+    serializer = UserSerializer(data=user)
+    if serializer.is_valid():
+        confirmation_code = get_random_string(length=20)
+        send_mail('Код подтверждения',
+                  f'Ваш код подтверждения: {confirmation_code}',
+                  'no-reply@api_yamdb.com',
+                  [user['email'], ],
+                  fail_silently=False,)
+        serializer.save(confirmation_code=confirmation_code)
+        return Response(request.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+def token(request):
+    serializer = TokenSerializer(data=request.data)
+    if serializer.is_valid():
+        if User.objects.filter(**request.data).exists():
+            user = User.objects.get(**request.data)
+            token = RefreshToken.for_user(user)
+            response_data = {'token': str(token.access_token)}
+            return Response(response_data, status=status.HTTP_200_OK)
+        return Response(request.data, status=status.HTTP_404_NOT_FOUND)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserViewSet(viewsets.ModelViewSet):
