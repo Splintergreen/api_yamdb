@@ -1,7 +1,6 @@
 from csv import DictReader
 
 from django.core.management import BaseCommand
-
 from reviews.models import Category, Comment, Genre, Review, Title, User
 
 files_to_download = {User: 'static/data/users.csv',

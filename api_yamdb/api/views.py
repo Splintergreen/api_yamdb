@@ -1,16 +1,16 @@
 from django.core.mail import send_mail
 from django.utils.crypto import get_random_string
-from reviews.models import User, Category, Genre, Title
-from .serializers import (CategorySerializer,
-                          TitlAddDataSerializer,
-                          TitleGetDataSerializer,
-                          UserSerializer, TokenSerializer, UserSerializer)
-from rest_framework import viewsets, filters, mixins, status
+from django_filters import CharFilter, FilterSet, NumberFilter
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
-from django_filters.rest_framework import DjangoFilterBackend
-from django_filters import FilterSet, CharFilter, NumberFilter
+from reviews.models import Category, Genre, Title, User
+
+from .serializers import (CategorySerializer, TitlAddDataSerializer,
+                          TitleGetDataSerializer, TokenSerializer,
+                          UserSerializer)
 
 
 @api_view(['POST'])
