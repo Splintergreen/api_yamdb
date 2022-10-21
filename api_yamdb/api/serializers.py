@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from reviews.models import Category, Genre, Title, User
+from reviews.models import Category, Genre, Title, User, Review, Comment
 
 
 class TokenSerializer(serializers.Serializer):
@@ -54,3 +54,30 @@ class TitlAddDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = Title
         fields = ('id', 'name', 'year', 'description', 'genre', 'category')
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        slug_field='username', read_only=True
+    )
+    title = serializers.SlugRelatedField(slug_field='name', read_only=True)
+
+    def validate_score(self, value):
+        if 0 > value > 10:
+            raise serializers.ValidationError('Выберите оценку от 1 до 10')
+        return value
+
+    class Meta:
+        model = Review
+        fields = ('id', 'title', 'text', 'author', 'score', 'pub_date')
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        slug_field='username', read_only=True
+    )
+    review = serializers.SlugRelatedField(slug_field='text', read_only=True)
+
+    class Meta:
+        model = Comment
+        fields = ('id', 'review', 'text', 'author', 'pub_date')
