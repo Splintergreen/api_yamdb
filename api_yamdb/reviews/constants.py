@@ -1,8 +1,8 @@
-
 USER = 'user'
 ADMIN = 'admin'
 MODERATOR = 'moderator'
 SUPER_USER = 'super_user'
+
 
 ROLES = [
     (USER, USER),
