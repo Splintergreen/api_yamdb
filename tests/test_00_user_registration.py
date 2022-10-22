@@ -140,7 +140,7 @@ class Test00UserRegistration:
 
         code = 201
         assert response.status_code == code, (
-            f'!Проверьте, что при {request_type} запросе `{self.url_admin_create_user}` с валидными данными '
+            f'Проверьте, что при {request_type} запросе `{self.url_admin_create_user}` с валидными данными '
             f'от имени администратора, создается пользователь и возвращается статус {code}'
         )
         response_json = response.json()
