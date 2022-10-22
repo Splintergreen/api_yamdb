@@ -3,7 +3,8 @@ from django.utils.crypto import get_random_string
 from django_filters import CharFilter, FilterSet, NumberFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, permissions, status, viewsets
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.shortcuts import get_object_or_404
@@ -16,6 +17,7 @@ from .serializers import (CategorySerializer, TitlAddDataSerializer,
 
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def signup(request):
     user = request.data
     serializer = UserSerializer(data=user)
@@ -27,11 +29,12 @@ def signup(request):
                   [user['email'], ],
                   fail_silently=False,)
         serializer.save(confirmation_code=confirmation_code)
-        return Response(request.data, status=status.HTTP_201_CREATED)
+        return Response(request.data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def token(request):
     serializer = TokenSerializer(data=request.data)
     if serializer.is_valid():
@@ -40,6 +43,8 @@ def token(request):
             token = RefreshToken.for_user(user)
             response_data = {'token': str(token.access_token)}
             return Response(response_data, status=status.HTTP_200_OK)
+        if User.objects.filter(username=request.data['username']):
+            return Response(request.data, status=status.HTTP_400_BAD_REQUEST)
         return Response(request.data, status=status.HTTP_404_NOT_FOUND)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
