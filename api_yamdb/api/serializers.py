@@ -1,5 +1,8 @@
 from django.db.models import Avg
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
+from rest_framework.validators import UniqueTogetherValidator, ValidationError
+
 from reviews.models import Category, Comment, Genre, Review, Title, User
 
 
@@ -63,15 +66,26 @@ class TitleAddDataSerializer(serializers.ModelSerializer):
 
 
 class ReviewSerializer(serializers.ModelSerializer):
-    author = serializers.SlugRelatedField(
-        slug_field='username', read_only=True
-    )
-    title = serializers.SlugRelatedField(slug_field='name', read_only=True)
+    author = serializers.SlugRelatedField(slug_field='username',
+                                          read_only=True, )
+    title = serializers.SlugRelatedField(slug_field='name', read_only=True, )
 
     def validate_score(self, value):
         if 0 > value > 10:
             raise serializers.ValidationError('Выберите оценку от 1 до 10')
         return value
+
+    def validate(self, data):
+        request = self.context["request"]
+        title_id = self.context["view"].kwargs.get("title_id")
+        title = get_object_or_404(Title, pk=title_id)
+        if request.method == "POST":
+            if Review.objects.filter(
+                    title=title, author=request.user
+            ).exists():
+                raise ValidationError(
+                    "Отзыв автора уже оставлен на данное произведение.")
+        return data
 
     class Meta:
         model = Review
