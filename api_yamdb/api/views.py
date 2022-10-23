@@ -5,7 +5,7 @@ from django_filters import CharFilter, FilterSet, NumberFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, status, viewsets, generics
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from reviews.models import Category, Comment, Genre, Review, Title, User
@@ -63,6 +63,7 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer.save()
 
 
+@permission_classes([IsAuthenticated])
 class CurrentUser(generics.RetrieveUpdateAPIView):
     serializer_class = UserSerializer
 
