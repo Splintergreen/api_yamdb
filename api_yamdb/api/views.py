@@ -1,20 +1,21 @@
 from django.core.mail import send_mail
+from django.shortcuts import get_object_or_404
 from django.utils.crypto import get_random_string
 from django_filters import CharFilter, FilterSet, NumberFilter
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, mixins, permissions, status, viewsets
+from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.shortcuts import get_object_or_404
-from reviews.models import Category, Genre, Title, User, Review, Comment
+from reviews.models import Category, Comment, Genre, Review, Title, User
 
-from .permissions import IsAuthorOrAdminOrReadOnly, IsAdminOrReadOnly
-from .serializers import (CategorySerializer, GenreSerializer,
-                          TitleAddDataSerializer,
-                          TitleGetDataSerializer, TokenSerializer,
-                          UserSerializer, ReviewSerializer, CommentSerializer)
+from .permissions import (IsAdminOrReadOnly,
+                          IsStaffOrModeratorOrAuthorPermission, StaffOnly)
+from .serializers import (CategorySerializer, CommentSerializer,
+                          GenreSerializer, ReviewSerializer,
+                          TitleAddDataSerializer, TitleGetDataSerializer,
+                          TokenSerializer, UserSerializer)
 
 
 @api_view(['POST'])
@@ -53,7 +54,7 @@ def token(request):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (permissions.IsAdminUser,)
+    permission_classes = (StaffOnly,)
 
     def perform_create(self, serializer):
         serializer.save()
@@ -83,19 +84,17 @@ class GenreViewSet(mixins.ListModelMixin,
     lookup_field = 'slug'
 
 
-# lookup_expr??
 class TitleFilterSet(FilterSet):
-    category = CharFilter(field_name='category__slug')
-    genre = CharFilter(field_name='genre__slug')
-    name = CharFilter(field_name='name')
-    year = NumberFilter(field_name='year')
+    category = CharFilter(field_name='category__slug', lookup_expr='icontains')
+    genre = CharFilter(field_name='genre__slug', lookup_expr='icontains')
+    name = CharFilter(field_name='name', lookup_expr='icontains')
+    year = NumberFilter(field_name='year', lookup_expr='icontains')
 
     class Meta:
         model = Title
         fields = ('category', 'genre', 'name', 'year')
 
 
-# rating??
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     permission_classes = (IsAdminOrReadOnly,)
@@ -110,7 +109,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = (IsAuthorOrAdminOrReadOnly,)
+    permission_classes = (IsStaffOrModeratorOrAuthorPermission,)
 
     def get_queryset(self):
         title_id = self.kwargs.get('title_id')
@@ -126,7 +125,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = (IsAuthorOrAdminOrReadOnly,)
+    permission_classes = (IsStaffOrModeratorOrAuthorPermission,)
 
     def get_queryset(self):
         review_id = self.kwargs.get('review_id')
