@@ -49,7 +49,7 @@ class TitleGetDataSerializer(serializers.ModelSerializer):
         return result['score__avg'] if result else 0
 
 
-class TitlAddDataSerializer(serializers.ModelSerializer):
+class TitleAddDataSerializer(serializers.ModelSerializer):
     category = serializers.SlugRelatedField(
         queryset=Category.objects.all(), slug_field="slug"
     )
