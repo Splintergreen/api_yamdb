@@ -55,8 +55,11 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (StaffOnly,)
+    lookup_field = 'username'
 
     def perform_create(self, serializer):
+        if 'role' not in self.request.data:
+            serializer.save(role='user')
         serializer.save()
 
 
