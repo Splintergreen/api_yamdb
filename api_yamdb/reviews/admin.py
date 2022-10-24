@@ -17,6 +17,7 @@ class UserAdmin(admin.ModelAdmin):
     search_fields = ('username', 'email', 'role', )
     empty_value_display = '-пусто-'
 
+
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ('name', 'slug', )

@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404
 from django.utils.crypto import get_random_string
 from django_filters import CharFilter, FilterSet, NumberFilter
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, mixins, status, viewsets, generics
+from rest_framework import filters, generics, mixins, status, viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response

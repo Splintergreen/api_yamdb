@@ -50,4 +50,4 @@ class Command(BaseCommand):
                     genre = Genre.objects.get(pk=row['genre_id'])
                     title = Title.objects.get(pk=row['title_id'])
                     title.genre.add(genre)
-        print(f'Загрузка данных завершена!')
+        print('Загрузка данных завершена!')
