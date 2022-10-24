@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt import tokens
 
 
 def create_users_api(admin_client):
@@ -25,7 +25,7 @@ def create_users_api(admin_client):
 
 
 def auth_client(user):
-    refresh = RefreshToken.for_user(user)
+    refresh = tokens.RefreshToken.for_user(user)
     client = APIClient()
     client.credentials(HTTP_AUTHORIZATION=f'Bearer {refresh.access_token}')
     return client
