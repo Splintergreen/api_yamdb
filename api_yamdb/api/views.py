@@ -7,7 +7,7 @@ from rest_framework import filters, generics, mixins, status, viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt import tokens
 from reviews.models import Category, Comment, Genre, Review, Title, User
 
 from .permissions import (IsAdminOrReadOnly,
@@ -42,7 +42,7 @@ def token(request):
     if serializer.is_valid():
         if User.objects.filter(**request.data).exists():
             user = User.objects.get(**request.data)
-            token = RefreshToken.for_user(user)
+            token = tokens.RefreshToken.for_user(user)
             response_data = {'token': str(token.access_token)}
             return Response(response_data, status=status.HTTP_200_OK)
         if User.objects.filter(username=request.data['username']):
