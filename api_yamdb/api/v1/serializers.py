@@ -69,11 +69,6 @@ class ReviewSerializer(serializers.ModelSerializer):
                                           read_only=True, )
     title = serializers.SlugRelatedField(slug_field='name', read_only=True, )
 
-    def validate_score(self, value):
-        if 0 > value > 10:
-            raise serializers.ValidationError('Выберите оценку от 1 до 10')
-        return value
-
     def validate(self, data):
         request = self.context["request"]
         title_id = self.context["view"].kwargs.get("title_id")
@@ -95,8 +90,8 @@ class CommentSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         slug_field='username', read_only=True
     )
-    review = serializers.SlugRelatedField(slug_field='text', read_only=True)
 
     class Meta:
-        model = Comment
         fields = ('id', 'review', 'text', 'author', 'pub_date')
+        model = Comment
+        extra_kwargs = {'review': {'required': False}}
