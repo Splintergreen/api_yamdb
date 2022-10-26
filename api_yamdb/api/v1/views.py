@@ -1,13 +1,14 @@
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from django.utils.crypto import get_random_string
-from django_filters import CharFilter, FilterSet, NumberFilter
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, generics, mixins, status, viewsets
+from rest_framework import filters, generics, status, viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt import tokens
+from .filters import TitleFilterSet
+from .mixins import CustomMixin
 from reviews.models import Category, Comment, Genre, Review, Title, User
 
 from .permissions import (IsAdminOrReadOnly,
@@ -74,10 +75,7 @@ class CurrentUser(generics.RetrieveUpdateAPIView):
         serializer.save(role=self.request.user.role)
 
 
-class CategoryViewSet(mixins.ListModelMixin,
-                      mixins.CreateModelMixin,
-                      mixins.DestroyModelMixin,
-                      viewsets.GenericViewSet):
+class CategoryViewSet(CustomMixin):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = (IsAdminOrReadOnly,)
@@ -86,27 +84,13 @@ class CategoryViewSet(mixins.ListModelMixin,
     lookup_field = 'slug'
 
 
-class GenreViewSet(mixins.ListModelMixin,
-                   mixins.CreateModelMixin,
-                   mixins.DestroyModelMixin,
-                   viewsets.GenericViewSet):
+class GenreViewSet(CustomMixin):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
     lookup_field = 'slug'
-
-
-class TitleFilterSet(FilterSet):
-    category = CharFilter(field_name='category__slug', lookup_expr='icontains')
-    genre = CharFilter(field_name='genre__slug', lookup_expr='icontains')
-    name = CharFilter(field_name='name', lookup_expr='icontains')
-    year = NumberFilter(field_name='year', lookup_expr='icontains')
-
-    class Meta:
-        model = Title
-        fields = ('category', 'genre', 'name', 'year')
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -128,8 +112,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         title_id = self.kwargs.get('title_id')
         title = get_object_or_404(Title, id=title_id)
-        queryset = Review.objects.filter(title_id=title.id)
-        return queryset
+        return title.reviews.all()
 
     def perform_create(self, serializer):
         title_id = self.kwargs.get('title_id')
@@ -143,11 +126,12 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         review_id = self.kwargs.get('review_id')
-        review = get_object_or_404(Review, id=review_id)
-        queryset = Comment.objects.filter(review_id=review.id)
-        return queryset
+        title_id = self.kwargs.get('title_id')
+        review = get_object_or_404(Review, id=review_id, title_id=title_id)
+        return Comment.objects.filter(review_id=review.id)
 
     def perform_create(self, serializer):
         review_id = self.kwargs.get('review_id')
-        review = get_object_or_404(Review, id=review_id)
+        title_id = self.kwargs.get('title_id')
+        review = get_object_or_404(Review, id=review_id, title_id=title_id)
         serializer.save(author=self.request.user, review_id=review.id)
