@@ -1,27 +1,12 @@
 from rest_framework import permissions
-from reviews.constants import ADMIN, MODERATOR, SUPER_USER
 
 
 class StaffOnly(permissions.BasePermission):
     def has_permission(self, request, view):
-        return (
-            not request.user.is_anonymous
-            and (
-                request.user.role == ADMIN
-                or request.user.role == SUPER_USER
-                or request.user.is_staff
-            )
-        )
+        return not request.user.is_anonymous and request.user.is_admin
 
     def has_object_permission(self, request, view, obj):
-        return (
-            not request.user.is_anonymous
-            and (
-                request.user.role == ADMIN
-                or request.user.role == SUPER_USER
-                or request.user.is_staff
-            )
-        )
+        return not request.user.is_anonymous and request.user.is_admin
 
 
 class IsAdminOrReadOnly(permissions.BasePermission):
@@ -29,11 +14,7 @@ class IsAdminOrReadOnly(permissions.BasePermission):
         if request.method in permissions.SAFE_METHODS:
             return True
         if not request.user.is_anonymous:
-            return (
-                request.user.role == ADMIN
-                or request.user.role == SUPER_USER
-                or request.user.is_staff
-            )
+            return request.user.is_admin
         return False
 
 
@@ -48,8 +29,6 @@ class IsStaffOrModeratorOrAuthorPermission(permissions.BasePermission):
         return (
             request.method in permissions.SAFE_METHODS
             or obj.author == request.user
-            or request.user.is_staff
-            or request.user.role == MODERATOR
-            or request.user.role == ADMIN
-            or request.user.role == SUPER_USER
+            or request.user.is_moderator
+            or request.user.is_admin
         )
