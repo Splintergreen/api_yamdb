@@ -37,18 +37,19 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class TitleGetDataSerializer(serializers.ModelSerializer):
+    queryset = Title.objects.annotate(
+        rating=Avg('reviews__score')).all()
     category = CategorySerializer(read_only=True)
     genre = GenreSerializer(read_only=True, many=True)
-    rating = serializers.SerializerMethodField()
+    rating = serializers.IntegerField(
+        source='reviews__score__avg',
+        read_only=True
+    )
 
     class Meta:
         model = Title
         fields = (
             'id', 'name', 'year', 'description', 'genre', 'category', 'rating')
-
-    def get_rating(self, obj):
-        result = obj.reviews.all().aggregate(Avg('score'))
-        return result['score__avg'] if result else 0
 
 
 class TitleAddDataSerializer(serializers.ModelSerializer):
