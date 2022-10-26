@@ -1,3 +1,5 @@
+import logging
+
 from csv import DictReader
 
 from django.core.management import BaseCommand
@@ -12,6 +14,8 @@ files_to_download = {User: 'static/data/users.csv',
                      'Genre_Title': 'static/data/genre_title.csv',
                      }
 
+logging.basicConfig(level=logging.INFO)
+
 
 class Command(BaseCommand):
     """Класс реализует загрузку данных из csv в таблицы моделей проекта."""
@@ -19,35 +23,16 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         for model, file in files_to_download.items():
-            print(f'Загрузка данных из файла {file} в модель {model}...')
+            logging.info(
+                f'Загрузка данных из файла {file} в модель {model}...')
 
             for row in DictReader(open(f'./{file}')):
-                if model == User:
-                    obj = model(id=row['id'], username=row['username'],
-                                email=row['email'], role=row['role'],
-                                bio=row['bio'], first_name=row['first_name'],
-                                last_name=row['last_name'])
-                    obj.save()
-                elif model == Category or model == Genre:
-                    obj = model(id=row['id'], name=row['name'],
-                                slug=row['slug'])
-                    obj.save()
-                elif model == Title:
-                    obj = model(id=row['id'], name=row['name'],
-                                year=row['year'], category_id=row['category'])
-                    obj.save()
-                elif model == Review:
-                    obj = model(id=row['id'], title_id=row['title_id'],
-                                text=row['text'], author_id=row['author'],
-                                score=row['score'], pub_date=row['pub_date'])
-                    obj.save()
-                elif model == Comment:
-                    obj = model(id=row['id'], review_id=row['review_id'],
-                                text=row['text'], author_id=row['author'],
-                                pub_date=row['pub_date'])
-                    obj.save()
-                else:
+                if model == 'Genre_Title':
                     genre = Genre.objects.get(pk=row['genre_id'])
                     title = Title.objects.get(pk=row['title_id'])
                     title.genre.add(genre)
-        print('Загрузка данных завершена!')
+                else:
+                    obj = model(**row)
+                    obj.save()
+
+        logging.info('Загрузка данных завершена!')
