@@ -12,7 +12,7 @@ from rest_framework_simplejwt import tokens
 from reviews.models import Category, Comment, Genre, Review, Title, User
 
 from .filters import TitleFilterSet
-from .mixins import CustomMixin
+from .mixins import ListCreateDestroyMixin
 from .permissions import (IsAdminOrReadOnly,
                           IsStaffOrModeratorOrAuthorPermission, StaffOnly)
 from .serializers import (CategorySerializer, CommentSerializer,
@@ -82,7 +82,7 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class CategoryViewSet(CustomMixin):
+class CategoryViewSet(ListCreateDestroyMixin):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = (IsAdminOrReadOnly,)
@@ -91,7 +91,7 @@ class CategoryViewSet(CustomMixin):
     lookup_field = 'slug'
 
 
-class GenreViewSet(CustomMixin):
+class GenreViewSet(ListCreateDestroyMixin):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     permission_classes = (IsAdminOrReadOnly,)
