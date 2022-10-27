@@ -4,22 +4,8 @@ from reviews.models import Category, Comment, Genre, Review, Title, User
 
 
 class TokenSerializer(serializers.Serializer):
-    username = serializers.CharField()
-    confirmation_code = serializers.CharField()
-
-    def validate_username(self, value):
-        if value is None:
-            raise serializers.ValidationError(
-                'Поле "Username" является обязательным!'
-            )
-        return value
-
-    def validate_confirmation_code(self, value):
-        if value is None:
-            raise serializers.ValidationError(
-                'Поле "confirmation_code" является обязательным!'
-            )
-        return value
+    username = serializers.CharField(required=True)
+    confirmation_code = serializers.CharField(required=True)
 
 
 class SignUpSerializer(serializers.ModelSerializer):
