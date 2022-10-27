@@ -1,5 +1,4 @@
 import logging
-
 from csv import DictReader
 
 from django.core.management import BaseCommand

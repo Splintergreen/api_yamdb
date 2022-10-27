@@ -10,13 +10,39 @@ class TokenSerializer(serializers.Serializer):
     def validate_username(self, value):
         if value is None:
             raise serializers.ValidationError(
-                'Поле "Username" является обязательным!')
+                'Поле "Username" является обязательным!'
+            )
         return value
 
     def validate_confirmation_code(self, value):
         if value is None:
             raise serializers.ValidationError(
-                'Поле "confirmation_code" является обязательным!')
+                'Поле "confirmation_code" является обязательным!'
+            )
+        return value
+
+
+class SignUpSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('username', 'email')
+
+    def validate_username(self, value):
+        if User.objects.filter(username=value.lower()).exists():
+            raise serializers.ValidationError(
+                f'Имя <<{value}>> уже используется!'
+            )
+        elif value == 'me':
+            raise serializers.ValidationError(
+                f'Использовать имя <<{value}>> в качестве username запрещено.'
+            )
+        return value
+
+    def validate_email(self, value):
+        if User.objects.filter(email=value.lower()).exists():
+            raise serializers.ValidationError(
+                f'Email <<{value}>> уже используется!'
+            )
         return value
 
 
@@ -26,12 +52,6 @@ class UserSerializer(serializers.ModelSerializer):
         fields = (
             'username', 'email', 'first_name', 'last_name', 'bio', 'role'
         )
-
-    def validate_username(self, value):
-        if value == 'me':
-            raise serializers.ValidationError(f"Использовать имя '{value}'"
-                                              "в качестве username запрещено.")
-        return value
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -57,7 +77,8 @@ class TitleGetDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = Title
         fields = (
-            'id', 'name', 'year', 'description', 'genre', 'category', 'rating')
+            'id', 'name', 'year', 'description', 'genre', 'category', 'rating'
+        )
 
 
 class TitleAddDataSerializer(serializers.ModelSerializer):
@@ -79,16 +100,16 @@ class ReviewSerializer(serializers.ModelSerializer):
     title = serializers.SlugRelatedField(slug_field='name', read_only=True, )
 
     def validate(self, data):
-        request = self.context['request']
-        if request.method != 'POST':
+        if self.context['request'].method != 'POST':
             return data
 
         title_id = self.context['view'].kwargs.get('title_id')
         if Review.objects.filter(
-                title_id=title_id, author=request.user
+                title_id=title_id, author=self.context['request'].user
         ).exists():
             raise ValidationError(
-                'Отзыв автора уже оставлен на данное произведение.')
+                'Отзыв автора уже оставлен на данное произведение.'
+            )
         return data
 
     class Meta:
