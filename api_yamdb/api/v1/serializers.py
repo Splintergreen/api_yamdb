@@ -18,7 +18,7 @@ class SignUpSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 f'Имя <<{value}>> уже используется!'
             )
-        elif value == 'me':
+        elif value.lower() == 'me':
             raise serializers.ValidationError(
                 f'Использовать имя <<{value}>> в качестве username запрещено.'
             )
